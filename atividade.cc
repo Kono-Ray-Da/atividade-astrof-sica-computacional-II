@@ -9,6 +9,7 @@ using namespace std;
 const double Rad2Deg = 180./M_PI;
 const double Deg2Rad = M_PI/180.;
 
+
 struct Eventos {
     double l;
     double b;
@@ -19,6 +20,7 @@ struct fontes {
     double fontesb;
     double distancia;
     double utc;
+    double score;
 };
 double RadiansToDegree(double ValueRadians){
     return ValueRadians*Rad2Deg;
@@ -33,37 +35,43 @@ double DegreeToRadians(double ValueDegree){
     return ValueDegree*Deg2Rad;
 }
 
+double funcaopeso (double sigma, double ComputeAngularDistance){
+    double k = 1./pow(sigma,2);
+    return exp(k*(cos(ComputeAngularDistance)-1.));
+}
 
-void EventosStarburst(const vector<Eventos>& eventos, const vector<fontes>& galaxias) {
+void EventosStarburst(const vector<Eventos>& eventos, const vector<fontes>& pontos) {
 
     //ao invez de um inteiro, fazemos uma matriz, pra cada galaxias, temos 10 janelas angulares direfentes
      int numStarbursts [23][10]={0};    
 
     //faz um aruivo de saida
-    ofstream arquivo("EventosStarburst.txt"); 
+    //ofstream arquivo("EventosStarburst.txt"); 
 
     //cabeçalho do arquivo de saida
-    arquivo<< "fonte  10 graus  9  8  7  6  5  4  3  2  1" << endl;     
+    //arquivo<< "fonte  10 graus  9  8  7  6  5  4  3  2  1" << endl;     
 
     //também estamos varrendo diferentes janelas angulares
     //faz mais sentido primeiro fixar galaxias e depois procurar eventos.
     for (int janelaAngular=1; janelaAngular<=10; janelaAngular++){  
-        for (int IndexGal=0; IndexGal<galaxias.size(); IndexGal++){  
-       
+        for (int IndexFontes=0; IndexFontes<pontos.size(); IndexFontes++){  
+        cout << "fonte: " << IndexFontes+1 << " janela angular: " << janelaAngular << endl;
             for (int IndexEvt=0; IndexEvt<eventos.size(); IndexEvt++){
 
                 double evtl = DegreeToRadians(eventos[IndexEvt].l);
                 double evtb = DegreeToRadians(eventos[IndexEvt].b);
 
-                double fontel = DegreeToRadians(galaxias[IndexGal].fontesl);
-                double fonteb = DegreeToRadians(galaxias[IndexGal].fontesb);
+                double fontel = DegreeToRadians(pontos[IndexFontes].fontesl);
+                double fonteb = DegreeToRadians(pontos[IndexFontes].fontesb);
 
                 // calculo da distancia angular entre dois pontos na esfera celeste
                 double angulo = ComputeAngularDistance(fontel, evtb, fontel, evtl);
 
+                double peso = funcaopeso(5, angulo);
+
                 //tem q ter o -1 pq a primeira posição tem indice 0
                 if (angulo <= janelaAngular) {
-                    numStarbursts[IndexGal][janelaAngular-1]++;  
+                    numStarbursts[IndexFontes][janelaAngular-1]++;  
                 }
 
             } // fim do for i
@@ -72,17 +80,22 @@ void EventosStarburst(const vector<Eventos>& eventos, const vector<fontes>& gala
 
     } //fim do for janelaAgular
 
-    for(int IndexGal=0; IndexGal<galaxias.size(); IndexGal++){
 
-        arquivo << IndexGal+1 << " ";
+ /*
+    for(int IndexFontes=0; IndexFontes<pontos.size(); IndexFontes++){
+  
+       
+        arquivo << IndexFontes+1 << " ";
 
         for (int janelaAngular=9; janelaAngular>=0; janelaAngular--){
-            arquivo  <<  numStarbursts[IndexGal][janelaAngular] << "  ";
+            arquivo  <<  numStarbursts[IndexFontes][janelaAngular] << "  ";
         } 
 
         arquivo << endl;
+       
     } // fim for j
 
+ */
 
 } //fim do void
 	
@@ -111,7 +124,7 @@ int main() {
 
     arquivo.close();
 
-    vector<fontes> fontes;
+    vector<fontes> pontos;
     //colunas: L(grau), b(grau) , Distancia(Mpc), utc
     
     ifstream arquivo2("2MASS.txt");
@@ -126,7 +139,7 @@ int main() {
                  >> fontesTemp.distancia
                  >> fontesTemp.utc;
 
-        fontes.push_back(fontesTemp);
+        pontos.push_back(fontesTemp);
     }
 
     arquivo2.close();
@@ -142,5 +155,5 @@ int main() {
     //analisarEnergias(eventos);
     //analisarDirecoes(eventos);
     //contarEventosCenA(eventos);
-    //EventosStarburst(eventos, fontes);
+    EventosStarburst(eventos, pontos);
 }
