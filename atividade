@@ -6,3 +6,58 @@
 
 using namespace std;
 
+int main() {
+    
+    vector<Eventos> eventos;
+    // colunas: l (graus), b (graus) coordenadas galacticas
+    ifstream arquivo("Eventos-totais.txt");
+    if (!arquivo) {
+        cerr << "erro ao abrir o arquivo Eventos-totais" << endl;
+        return 1;
+    }
+  
+    while (!arquivo.eof()) {
+      
+        Eventos eventoTemp;
+
+        arquivo >> eventoTemp.l
+                >> eventoTemp.b;
+                
+        eventos.push_back(eventoTemp);
+    }
+
+    arquivo.close();
+
+    vector<fontes> fonte;
+    //colunas: L(grau), b(grau) , Distancia(Mpc), utc
+    
+    ifstream arquivo2("2MASS.txt");
+    if (!arquivo2){
+        cerr << "erro ao abrir arquivo 2MASS" << endl;
+        return 1;
+    }
+    while (!arquivo2.eof()) {
+        fontes fonteTemp;
+        arquivo2 >> fonteTemp.fonteL
+                 >> fonteTemp.fonteB
+                 >> fonteTemp.distancia
+                 >> fonteTemp.utc;
+
+        fonte.push_back(fonteTemp);
+    }
+
+    arquivo2.close();
+
+    /*
+    cout << "===========================================\n";
+    cout << "  ANALISE DE EVENTOS DE RAIOS COSMICOS\n";
+    cout << "===========================================\n\n";
+    cout << "Arquivo lido com sucesso.\n";
+    cout << "Quantidade de eventos carregados: " << eventos.size() << "\n";
+
+    */
+    //analisarEnergias(eventos);
+    //analisarDirecoes(eventos);
+    //contarEventosCenA(eventos);
+    //EventosStarburst(eventos, fonte);
+}
