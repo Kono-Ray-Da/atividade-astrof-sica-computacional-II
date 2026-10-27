@@ -55,70 +55,130 @@ CoordenadasGalaticas CoordenadaEquatorialGalatica(double ra_deg, double dec_deg)
     return CoordenadasGalaticas{l, b};
 }
 
-int main (){
+
+void converterCoordenadas() {
 
     //lendo o arquivo de eventos e devolvendo o arquivo com as coordenadas galaticas
     ifstream entrada("Eventos.txt");
     ofstream saida("eventos_galaticos.txt");
 
+    //cout << "arquivo de saida aberto" << endl;
+
     if (!entrada){
         cerr << "erro ao abrir eventos.txt" << endl;
-        return 1;
     }
 
     if (!saida){
         cerr << "erro ao abrir eventos_galaticos.txt" << endl;
-        return 1;
     }
 
     //cabeçalho do arquivo de saída
-    saida << "# AugId l b Ecor UTC Theta Phi T5 FTR \n" << endl;
+    saida << "# AugId l b Ecor UTC Theta Phi T5 FTR" << endl;
 
-    long long augId;
-    double dec, ra, ecor, theta, phi, UTC, t5, ftr;
+    long long AugId;
+    double Dec, Ra, Ecor, Theta, Phi, UTC;
+    int t5, ftr;
     double l, b;
 
     string linha;
 
     while (getline(entrada, linha)) {
 
-            cout << "linha lida: [" << linha << "]" << augId << endl;
+            //cout << "linha lida: [" << linha << "]" << augId << endl;
         
-        stringstream ss(linha);
+            stringstream ss(linha);
 
-        if (ss >> augId >> dec >> ra >> ecor >> UTC >> theta >> phi >> t5 >> ftr) {
-        cout << "LEITURA DOS 9 VALORES OK!" << endl;
-        cout << "AugId = " << augId << endl;
-        cout << "Dec   = " << dec << endl;
-        cout << "RA    = " << ra << endl;
-        
-        CoordenadasGalaticas galaticas =
-        CoordenadaEquatorialGalatica(ra, dec);
+            if (ss >> AugId >> Dec >> Ra >> Ecor >> UTC >> Theta >> Phi >> t5 >> ftr) {
+                //cout << "LEITURA DOS 9 VALORES OK!" << endl;
+                //cout << "AugId = " << AugId << endl;
+                //cout << "Dec   = " << Dec << endl;
+                //cout << "RA    = " << Ra << endl;
+            
+                CoordenadasGalaticas galaticas = CoordenadaEquatorialGalatica(Ra, Dec);
 
-        cout << "l = " << galaticas.l << endl;
-        cout << "b = " << galaticas.b << endl;
+                //cout << "l = " << galaticas.l << endl;
+                //cout << "b = " << galaticas.b << endl;
+                
+                //cout << "escrevendo no arquivo de saida..." << endl;
+                saida << AugId << " "<< galaticas.l << " "
+                      << galaticas.b << " "
+                      << Ecor << " "
+                      << UTC << " "
+                      << Theta  << " "
+                      << Phi << " "
+                      << t5 << " "
+                      << ftr
+                      << endl;
+                
+                    //cout << "escrevi um evento no arquivo" << endl;
 
-        saida << augId << " "
-          << galaticas.l << " "
-          << galaticas.b << " "
-          << ecor << " "
-          << UTC << " "
-          << theta << " "
-          << phi << " "
-          << t5 << " "
-          << ftr << endl;
+            }else{
+             //cout << "ERRO AO CONVERTER ESTA LINHA!" << endl;
+            }
+    }
 
+            entrada.close();
+            saida.close();
+            cout << "conversão feita de (ra,dec) para (l,b) " << endl;
+
+}
+
+struct EventosGalaticos {
+    long long  AugId;
+    double l;
+    double b;
+    double Ecor;
+    double UTC;
+    double Theta;
+    double Phi;
+    int T5;
+    int FTR;
+};
+
+void Energias (vector<EventosGalaticos> eventos){ //troca o nome plss
+
+    ofstream saida10("Eventos_com_Energia_Maior_Que_10.txt");
+    ofstream saida20("Eventos_com_Energia_Maior_Que_20.txt");
+    ofstream saida40("Eventos_com_Energia_Maior_Que_40.txt");
+    ofstream saida60("Eventos_com_Energia_Maior_Que_60.txt");
+
+    saida10 << "# AugId Ecor l b" << endl;
+    saida20 << "# AugId Ecor l b" << endl;
+    saida40 << "# AugId Ecor l b" << endl;
+    saida60 << "# AugId Ecor l b" << endl;
+
+    //cout << "ENTREI NA FUNCAO ENERGIAS" << endl;
+    //cout << "numero de eventos: " << eventos.size() << endl;
+
+    for (int i=0; i<eventos.size(); i++){
+
+        if(eventos[i].Ecor >=10 && eventos[i].Ecor<20 ){
+            saida10 << "AugId: " << eventos[i].AugId << "\tl: " << eventos[i].l << "\tb: " << eventos[i].b << "\tEcor: " << eventos[i].Ecor << endl;
         }
-        else {
-        cout << "ERRO AO CONVERTER ESTA LINHA!" << endl;
+
+        if(eventos[i].Ecor >= 20 && eventos[i].Ecor < 40){
+            saida20 << "AugId: " << eventos[i].AugId << "\tl: " << eventos[i].l << "\tb: " << eventos[i].b << "\tEcor: " << eventos[i].Ecor << endl;
+        }
+
+        if(eventos[i].Ecor >= 40 && eventos[i].Ecor < 60){
+            saida40 << "AugId: " << eventos[i].AugId << "\tl: " << eventos[i].l << "\tb: " << eventos[i].b << "\tEcor: " << eventos[i].Ecor << endl;
+        }
+
+        if(eventos[i].Ecor >= 60){
+            saida60 << "AugId: " << eventos[i].AugId << "\tl: " << eventos[i].l << "\tb: " << eventos[i].b << "\tEcor: " << eventos[i].Ecor << endl;
         }
     }
 
-    entrada.close();
-    saida.close();
-    cout << "conversão feita de (ra,dec) para (l,b) " << endl;
-    return 1;
+    saida10.close();
+    saida20.close();
+    saida40.close();
+    saida60.close();
+}
 
+
+
+
+int main() {  
     vector<fontes> pontos;
      ifstream arquivo2("2MASS.txt");
     if (!arquivo2){
@@ -136,12 +196,41 @@ int main (){
     }
     arquivo2.close();
 
+    //converterCoordenadas();
 
+    vector<EventosGalaticos> eventos;
+    ifstream arquivo1("eventos_galaticos.txt");
+    //cout << "arquivo eventos_galaticos.txt aberto" << endl;
+    if (!arquivo1){
+        cerr << "erro ao abrir arquivo eventos-galaticos"<< endl;
+        return 1;
+    }
 
+    arquivo1.ignore(1000, '\n');
+    cout << "estado antes da leitura: " << arquivo1.good() << endl;
+    EventosGalaticos eventosTemp;
+    while (arquivo1 >> eventosTemp.AugId
+                >> eventosTemp.l
+                >> eventosTemp.b
+                >> eventosTemp.Ecor
+                >> eventosTemp.UTC
+                >> eventosTemp.Theta
+                >> eventosTemp.Phi
+                >> eventosTemp.T5
+                >> eventosTemp.FTR) {
 
+                //cout << "augId: " << eventosTemp.AugId << ", l: " << eventosTemp.l << ", b: " << eventosTemp.b << ", Ecor: " << eventosTemp.Ecor << endl;
+                //cout << "proximo caractere: " << arquivo1.peek() << endl;
+        eventos.push_back(eventosTemp);
+    
+    }
+        
 
+    arquivo1.close();
 
+    cout << "numero de eventos lidos: " << eventos.size() << endl;
 
+    Energias(eventos);
 
 
 }
