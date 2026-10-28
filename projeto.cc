@@ -4,6 +4,7 @@
 #include <vector>
 #include <cmath>
 #include <sstream>
+#include <limits>
 
 using namespace std;
 
@@ -15,13 +16,23 @@ struct CoordenadasGalaticas {
     double b;
 };
 
-struct fontes {
-    double fontesl;
-    double fontesb;
-    double distancia;
-    double utc;
-    double score;
-};
+double RadiansToDegree(double ValueRadians){
+    return ValueRadians*Rad2Deg;
+}
+
+double ComputeAngularDistance(double lpoint1, double lpoint2, double bpoint1, double bpoint2){
+    double cosTheta = sin (bpoint1) * sin(bpoint2) + cos(bpoint1) * cos(bpoint2) * cos(lpoint1 - lpoint2);
+    double Distance = acos(cosTheta);
+    // Evita erros numericos no acos
+    if (cosTheta > 1.0) cosTheta = 1.0;
+    if (cosTheta < -1.0) cosTheta = -1.0;
+    return RadiansToDegree(Distance);
+}
+
+double DegreeToRadians(double ValueDegree){
+    return ValueDegree*Deg2Rad;
+}
+
 
 CoordenadasGalaticas CoordenadaEquatorialGalatica(double ra_deg, double dec_deg) {
 
@@ -135,6 +146,18 @@ struct EventosGalaticos {
     int FTR;
 };
 
+struct FontesAstrofisicas {
+    double L;
+    double B;
+    double Distancia;
+    double Wtotal;
+};
+
+double funcaopeso (double sigma, double ComputeAngularDistance){
+    double k = 1./pow(sigma,2);
+    return exp(k*(cos(ComputeAngularDistance)-1.));
+};
+
 void Energias (vector<EventosGalaticos> eventos){ //troca o nome plss
 
     ofstream saida10("Eventos_com_Energia_Maior_Que_10.txt");
@@ -168,47 +191,164 @@ void Energias (vector<EventosGalaticos> eventos){ //troca o nome plss
             saida60 << "AugId: " << eventos[i].AugId << "\tl: " << eventos[i].l << "\tb: " << eventos[i].b << "\tEcor: " << eventos[i].Ecor << endl;
         }
     }
-
     saida10.close();
     saida20.close();
     saida40.close();
     saida60.close();
 }
 
+void FA (const vector<FontesAstrofisicas> fontes, const vector<EventosGalaticos> eventos){
+
+    // janela angular
+    // distancia media
+
+    int total = fontes.size();
+    double numStarbursts [fontes.size()][3]={0}; 
+
+    for (int janelAng=5; janelAng<20; janelAng+=5){
+
+        vector<double> score(fontes.size(), 0.0);
+
+        for (int ifontes=0; ifontes<fontes.size(); ifontes++){
+
+            for (int iEventos=0; iEventos<eventos.size(); iEventos++){
+
+                double eventol = DegreeToRadians(eventos[iEventos].l);
+                double eventob = DegreeToRadians(eventos[iEventos].b);
+
+                double fontel = DegreeToRadians(fontes[ifontes].L);
+                double fonteb = DegreeToRadians(fontes[ifontes].B);
+
+                // calculo da distancia angular entre dois pontos na esfera celeste
+                double angulo = ComputeAngularDistance(fontel, eventob, fontel, eventol);
+
+                 double peso = funcaopeso(janelAng, angulo);
+
+                //tem q ter o -1 pq a primeira posição tem indice 0
+                if (angulo <= janelAng) {
+                    //cout << "chegou aqui" << endl;
+                    //cout << "fonte: " << IndexFontes+1 << " janela angular: " << janelaAngular << endl;
+                    numStarbursts[ifontes][(janelAng/5)-1] += peso;
+                    score[ifontes] += peso;  
+                }
+
+
+            } //fim do for dos eventos
+
+        } //fim do for das fontes
+
+        cout << "Terminou calculo da janela " << janelAng << endl;
+    
+
+        vector<int> indice(fontes.size());
+
+        // Guarda a identificação original de cada fonte
+        for (int i = 0; i < fontes.size(); i++) {
+            indice[i] = i;
+        }
+
+        //cout << "Terminou calculo da janela " << janelaAngular << endl;
+        //cout << "Comecando ordenacao..." << endl;
+
+        // Procura o maior score e coloca no início
+        for (int i = 0; i < fontes.size() - 1; i++) {
+            int maior = i;
+
+            for (int j = i + 1; j < fontes.size(); j++) {
+
+                if (score[j] > score[maior]) {
+                    maior = j;
+                }
+            }
+
+            // troca os scores
+            double auxScore = score[i];
+            score[i] = score[maior];
+            score[maior] = auxScore;
+
+            // troca também os índices das fontes
+            int auxIndice = indice[i];
+            indice[i] = indice[maior];
+            indice[maior] = auxIndice;
+        }
+
+        string Nome = "resultado_"+to_string(janelAng)+".txt";
+
+        ofstream saida(Nome.c_str());
+        saida << "Ranking\tl\tb\tS_j\tIdentificacao_da_fonte\n";
+        //cout << "Numero de fontes: " << fontes.size() << endl;
+
+        for (int i = 0; i < 10 && i < fontes.size(); i++) {
+
+            int ponto = indice[i];
+
+            saida << i + 1 << "\t"
+                << fontes[ponto].L << "\t"
+                << fontes[ponto].B << "\t"
+                << score[i] << "\t"
+                << ponto + 1
+                << "\n";
+        }
+
+        saida.close();
+        
+        cout << "Resultados escritos no arquivo " << Nome << endl;
+    
+    
+    
+    
+    
+    
+    
+    
+    } //fim da janela angular
+
+
+
+
+
+
+}
+
 
 
 
 int main() {  
-    vector<fontes> pontos;
+    vector<FontesAstrofisicas> fontes;
      ifstream arquivo2("2MASS.txt");
+     //cout << "arquivo 2mass aberto" << endl;
     if (!arquivo2){
         cerr << "erro ao abrir arquivo 2MASS" << endl;
         return 1;
     }
     while (!arquivo2.eof()) {
-        fontes fontesTemp;
-        arquivo2 >> fontesTemp.fontesl
-                 >> fontesTemp.fontesb
-                 >> fontesTemp.distancia
-                 >> fontesTemp.utc;
+        FontesAstrofisicas fontesTemp;
+        arquivo2 >> fontesTemp.L
+                 >> fontesTemp.B
+                 >> fontesTemp.Distancia
+                 >> fontesTemp.Wtotal;
 
-        pontos.push_back(fontesTemp);
+        fontes.push_back(fontesTemp);
     }
     arquivo2.close();
 
-    //converterCoordenadas();
+    cout << "numero de fontes lidoa: " << fontes.size() << endl;
+
 
     vector<EventosGalaticos> eventos;
     ifstream arquivo1("eventos_galaticos.txt");
     //cout << "arquivo eventos_galaticos.txt aberto" << endl;
+
     if (!arquivo1){
         cerr << "erro ao abrir arquivo eventos-galaticos"<< endl;
         return 1;
     }
 
     arquivo1.ignore(1000, '\n');
-    cout << "estado antes da leitura: " << arquivo1.good() << endl;
+    //cout << "estado antes da leitura: " << arquivo1.good() << endl;
+
     EventosGalaticos eventosTemp;
+
     while (arquivo1 >> eventosTemp.AugId
                 >> eventosTemp.l
                 >> eventosTemp.b
@@ -230,7 +370,8 @@ int main() {
 
     cout << "numero de eventos lidos: " << eventos.size() << endl;
 
-    Energias(eventos);
 
+    //Energias(eventos);
+    FA(fontes, eventos);
 
 }
