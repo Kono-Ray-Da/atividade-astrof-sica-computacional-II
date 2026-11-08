@@ -1,0 +1,11 @@
+Ranking: 	l: 	b: 	Distancia_Mpc: 	S_j: 	Numero_Eventos: 	Energia_Media: 	Identificacao_da_fonte: 
+Ranking: 1	l: 25.0797	b: -32.8022	Distancia_Mpc: 116.6	S_j: 484.344	Numero_Eventos: 612	Energia_Media: 7.6936	Identificacao_da_fonte: 21683
+Ranking: 2	l: 25.1221	b: -33.6148	Distancia_Mpc: 121.5	S_j: 483.906	Numero_Eventos: 612	Energia_Media: 7.51382	Identificacao_da_fonte: 23088
+Ranking: 3	l: 25.0763	b: -32.8829	Distancia_Mpc: 121.5	S_j: 482.553	Numero_Eventos: 609	Energia_Media: 7.7012	Identificacao_da_fonte: 23028
+Ranking: 4	l: 25.0844	b: -33.1093	Distancia_Mpc: 120.9	S_j: 480.767	Numero_Eventos: 606	Energia_Media: 7.57688	Identificacao_da_fonte: 22931
+Ranking: 5	l: 25.159	b: -32.3991	Distancia_Mpc: 122.7	S_j: 478.904	Numero_Eventos: 604	Energia_Media: 7.69379	Identificacao_da_fonte: 23480
+Ranking: 6	l: 26.1114	b: -32.8162	Distancia_Mpc: 160.7	S_j: 478.306	Numero_Eventos: 600	Energia_Media: 7.63591	Identificacao_da_fonte: 33251
+Ranking: 7	l: 25.4054	b: -32.4732	Distancia_Mpc: 121.5	S_j: 477.688	Numero_Eventos: 601	Energia_Media: 7.6718	Identificacao_da_fonte: 23138
+Ranking: 8	l: 26.7919	b: -31.5907	Distancia_Mpc: 245.7	S_j: 477.544	Numero_Eventos: 604	Energia_Media: 7.69812	Identificacao_da_fonte: 43809
+Ranking: 9	l: 24.7435	b: -32.9034	Distancia_Mpc: 162	S_j: 477.134	Numero_Eventos: 601	Energia_Media: 7.67126	Identificacao_da_fonte: 33498
+Ranking: 10	l: 25.356	b: -33.7145	Distancia_Mpc: 162	S_j: 476.67	Numero_Eventos: 600	Energia_Media: 7.50648	Identificacao_da_fonte: 33503
